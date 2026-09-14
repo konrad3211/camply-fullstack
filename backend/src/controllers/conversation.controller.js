@@ -287,10 +287,8 @@ export const getConversationMessages = async (req, res) => {
 
   const page = Math.max(Number(req.query.page) || 1, 1);
   const limit = Math.min(Math.max(Number(req.query.limit) || 30, 1), 100);
-  //ile wiadomości ma pominac
   const skip = (page - 1) * limit;
 
-  //liczy wszystkie wiadomosci tej rozmowy, zwraca tylko liczbe
   const totalMessages = await Message.countDocuments({
     conversation: conversation._id,
   });
@@ -300,9 +298,7 @@ export const getConversationMessages = async (req, res) => {
   })
     .populate("sender", "username fullName imageUrl")
     .sort({ createdAt: -1 })
-    //pomija odpowiednia liczbe wiadomosci, dla 1st page 0, dla 2 30 najnowszych, dla 3 60...
     .skip(skip)
-    //pobiera max tyle wiadomosci ile limit
     .limit(limit);
 
   messages.reverse();
