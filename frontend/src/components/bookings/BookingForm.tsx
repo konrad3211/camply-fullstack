@@ -107,6 +107,10 @@ const BookingForm = ({ campgroundId, pricePerNight }: BookingFormProps) => {
       setIsCreating(true);
       setError("");
 
+      if (!selectedRange?.from || !selectedRange?.to) {
+        return;
+      }
+
       const data = await createBooking(campgroundId, {
         checkIn: formatDateForApi(selectedRange.from),
         checkOut: formatDateForApi(selectedRange.to),

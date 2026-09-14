@@ -25,6 +25,7 @@ import {
   updateProfileImage,
 } from "@/api/user.api";
 import { toast } from "sonner";
+import axios from "axios";
 
 const UserProfilePage = () => {
   const currentUser = useAuthStore((state) => state.user);
@@ -99,7 +100,11 @@ const UserProfilePage = () => {
       resetPassword();
     } catch (error) {
       console.error("Failed to change a password", error);
-      toast.error(error.response?.data?.message);
+      const message = axios.isAxiosError(error)
+        ? error.response?.data?.message
+        : "Something went wrong";
+
+      toast.error(message);
     }
   };
 
@@ -113,7 +118,10 @@ const UserProfilePage = () => {
       toast.success("An image has been changed successfully!");
     } catch (error) {
       console.error("Failed to change a profile image", error);
-      toast.error(error.response?.data?.message);
+      const message = axios.isAxiosError(error)
+        ? error.response?.data?.message
+        : "Something went wrong";
+      toast.error(message);
     }
   };
 
@@ -140,8 +148,8 @@ const UserProfilePage = () => {
         <CardContent>
           <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
             <img
-              src={currentUser.imageUrl}
-              alt={currentUser.username}
+              src={currentUser?.imageUrl}
+              alt={currentUser?.username}
               className="size-24 shrink-0 rounded-full border object-cover shadow-sm"
             />
 

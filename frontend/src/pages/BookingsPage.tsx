@@ -26,37 +26,38 @@ import { Link, useSearchParams } from "react-router-dom";
 import { CalendarDays, Eye } from "lucide-react";
 import ErrorState from "@/components/ErrorState";
 
+type BookingStatus = "confirmed" | "pending" | "cancelled";
+
 const BookingsPage = () => {
   const currentUser = useAuthStore((state) => state.user);
 
   const [bookings, setBookings] = useState<Booking[]>([]);
-  const [filter, setFilter] = useState([]);
+  const [filter, setFilter] = useState<BookingStatus[]>([]);
   const [fetchBookingsError, setFetchBookingsError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [urlSearchParams, setUrlSearchParams] = useSearchParams();
   const [totalPages, setTotalPages] = useState(1);
   const page = Math.max(Number(urlSearchParams.get("page")) || 1, 1);
   const pages = Array.from({ length: totalPages }, (_, index) => index + 1);
-  const status = urlSearchParams.get("status");
-
-  const params = {
-    page,
-    status,
-    limit: 10,
-  };
+  const status = urlSearchParams.get("status") ?? undefined;
 
   useEffect(() => {
     const fetchBookings = async () => {
       try {
+        setIsLoading(true);
         setFetchBookingsError("");
 
-        const data = await getUserBookings(params);
+        const data = await getUserBookings({
+          page,
+          status,
+          limit: 10,
+        });
+
         setTotalPages(data.totalPages);
         setBookings(data.data);
         setFilter(data.statuses);
       } catch (error) {
         console.error("Failed to fetch user bookings:", error);
-
         setFetchBookingsError("Failed to fetch user bookings");
       } finally {
         setIsLoading(false);
@@ -64,7 +65,7 @@ const BookingsPage = () => {
     };
 
     fetchBookings();
-  }, [params.page, params.limit, params.status]);
+  }, [page, status]);
 
   const handleCancelBooking = async (bookingId: string) => {
     try {
@@ -138,9 +139,7 @@ const BookingsPage = () => {
       <div className="flex flex-wrap gap-2 rounded-xl border bg-muted/20 p-2">
         <Button
           variant={
-            ["confirmed", "cancelled", "pending"].includes(
-              urlSearchParams.get("status"),
-            )
+            ["confirmed", "cancelled", "pending"].includes(status ?? "")
               ? "ghost"
               : "default"
           }

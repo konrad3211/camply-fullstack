@@ -1,4 +1,5 @@
 import type { Campground } from "./campground";
+import type { User } from "./user";
 
 export type CreateBookingResponse = {
   success: string;
@@ -9,7 +10,7 @@ export type CreateBookingResponse = {
 export type Booking = {
   _id: string;
   campground: Campground;
-  user: string;
+  user: string | User;
   checkIn: string;
   checkOut: string;
   numberOfNights: number;

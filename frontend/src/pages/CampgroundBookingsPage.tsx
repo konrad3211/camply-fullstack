@@ -19,6 +19,7 @@ import {
   X,
 } from "lucide-react";
 import ErrorState from "@/components/ErrorState";
+import type { User } from "@/types/user";
 
 const CampgroundBookingsPage = () => {
   const { campgroundId } = useParams<{ campgroundId: string }>();
@@ -131,7 +132,7 @@ const CampgroundBookingsPage = () => {
           const checkIn = new Date(booking.checkIn);
           const checkOut = new Date(booking.checkOut);
 
-          const user = booking.user as any;
+          const user = booking.user as User;
 
           const formattedCheckIn = checkIn.toLocaleDateString("pl-PL", {
             timeZone: "Europe/Warsaw",

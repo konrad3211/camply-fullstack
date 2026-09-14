@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ImagePlus, MapPin, TentTree } from "lucide-react";
@@ -19,6 +19,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import axios from "axios";
 
 const inputClassName =
   "w-full rounded-lg border bg-background px-3 py-2.5 text-sm outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/20 disabled:cursor-not-allowed disabled:opacity-50";
@@ -52,14 +53,11 @@ const CreateCampgroundPage = () => {
 
       navigate(`/campgrounds/${response.data._id}`);
     } catch (error) {
-      console.error(
-        "Failed to create a campground:",
-        error.response?.data?.message,
-      );
-
-      setServerError(
-        error.response?.data?.message ?? "Failed to create a campground",
-      );
+      const message = axios.isAxiosError(error)
+        ? error.response?.data?.message
+        : "Something went wrong";
+      console.error(message);
+      setServerError(message);
     }
   };
 

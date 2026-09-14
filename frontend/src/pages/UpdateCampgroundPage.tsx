@@ -53,6 +53,7 @@ import { deleteOwnerBooking, getOwnerBlockedDates } from "@/api/booking.api";
 import BookingFormForOwner from "@/components/bookings/BookingFormForOwner";
 import type { Booking } from "@/types/booking";
 import ErrorState from "@/components/ErrorState";
+import axios from "axios";
 
 const UpdateCampgroundPage = () => {
   const { id } = useParams();
@@ -164,9 +165,10 @@ const UpdateCampgroundPage = () => {
       navigate(`/campgrounds/${id}`);
     } catch (error) {
       console.error("Failed to update a campground", error);
-      setServerError(
-        error.response?.data?.message ?? "Failed to update a campground",
-      );
+      const message = axios.isAxiosError(error)
+        ? error.response?.data?.message
+        : "Something went wrong";
+      setServerError(message);
     }
   };
 
@@ -189,7 +191,11 @@ const UpdateCampgroundPage = () => {
       return toast.success("Image uploaded successfully");
     } catch (error) {
       console.error("Failed to update campground images");
-      toast.error(error.response?.data?.message ?? "Failed to upload images");
+      const message = axios.isAxiosError(error)
+        ? error.response?.data?.message
+        : "Something went wrong";
+
+      toast.error(message);
     }
   };
 
@@ -206,9 +212,11 @@ const UpdateCampgroundPage = () => {
       });
     } catch (error) {
       console.error("Failed to delete an image", error);
-      toast.warning(
-        error.response?.data?.message ?? "Failed to delete an image",
-      );
+      const message = axios.isAxiosError(error)
+        ? error.response?.data?.message
+        : "Something went wrong";
+
+      toast.error(message);
     } finally {
       setIsImageDeleting(false);
     }
@@ -226,9 +234,11 @@ const UpdateCampgroundPage = () => {
       });
     } catch (error) {
       console.error("Failed to delete a campground", error);
-      toast.error(
-        error.response?.data?.message ?? "Failed to delete a campground",
-      );
+      const message = axios.isAxiosError(error)
+        ? error.response?.data?.message
+        : "Something went wrong";
+
+      toast.error(message);
       setIsCampgroundDeleting(false);
     }
   };
@@ -266,7 +276,7 @@ const UpdateCampgroundPage = () => {
     return <p>Campground not found</p>;
   }
 
-  if (campground?.author._id !== currentUser._id) {
+  if (campground?.author._id !== currentUser?._id) {
     return (
       <Navigate
         to={"/"}

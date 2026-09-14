@@ -24,7 +24,7 @@ const ConversationsPage = () => {
     const sender = conversation?.lastMessage?.sender;
     if (!sender) return;
 
-    const isCurrentUser = sender?._id === currentUser._id;
+    const isCurrentUser = sender?._id === currentUser?._id;
     const isOwner = sender?._id === conversation?.campground?.author?._id;
 
     if (isCurrentUser) {

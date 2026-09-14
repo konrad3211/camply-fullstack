@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 import { login } from "../api/auth.api";
 import { Button } from "@/components/ui/button";
+import axios from "axios";
 
 const LoginPage = () => {
   const location = useLocation();
@@ -34,8 +35,11 @@ const LoginPage = () => {
       });
     } catch (error) {
       console.error("Login flow failed:", error);
+      const message = axios.isAxiosError(error)
+        ? error.response?.data?.message
+        : "Something went wrong";
 
-      setError(error.response?.data?.message ?? "Failed to log in");
+      setError(message);
     } finally {
       setIsLoading(false);
     }

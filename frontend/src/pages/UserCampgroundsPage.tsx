@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/card";
 import { useAuthStore } from "@/store/auth.store";
 import type { Campground } from "@/types/campground";
+import axios from "axios";
 import { ArrowLeft, MapPin, Plus, TentTree } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
@@ -50,29 +51,34 @@ const UserCampgroundsPage = () => {
   const pages = Array.from({ length: totalPages }, (_, index) => index + 1);
   const page = Math.max(Number(urlSearchParams.get("page")) || 1, 1);
 
-  const params = {
-    page,
-    limit: 10,
-  };
-
   useEffect(() => {
     if (!currentUser || !userId) return;
+
     const fetchCampgrounds = async () => {
       try {
         setError("");
-        const data = await getUserCampgrounds(userId, params);
+
+        const data = await getUserCampgrounds(userId, {
+          page,
+          limit: 10,
+        });
+
         setCampgrounds(data.data);
         setTotalPages(data.totalPages);
       } catch (error) {
         console.error("Failed to fetch user campgrounds", error);
         setError("Failed to fetch user campgrounds");
-        toast.error(error.response?.data?.message);
+        const message = axios.isAxiosError(error)
+          ? error.response?.data?.message
+          : "Something went wrong";
+        toast.error(message);
       } finally {
         setIsLoading(false);
       }
     };
+
     fetchCampgrounds();
-  }, [currentUser, userId, params.page, params.limit]);
+  }, [currentUser, userId, page]);
 
   useEffect(() => {
     if (!currentUser || currentUser._id !== userId) return;
@@ -81,12 +87,11 @@ const UserCampgroundsPage = () => {
         const data = await getBookingsStats();
         setBookingStats(data.data);
       } catch (error) {
-        console.error("Failed to fetch number of bookings");
+        console.error("Failed to fetch number of bookings", error);
       }
     };
     fetchBookingsCount();
-  }, []);
-
+  }, [currentUser, userId]);
   if (!userId) {
     return <Navigate to="/" />;
   }
@@ -99,7 +104,7 @@ const UserCampgroundsPage = () => {
     return <ErrorState message={error} />;
   }
 
-  if (campgrounds.length === 0 && currentUser._id === userId) {
+  if (campgrounds.length === 0 && currentUser?._id === userId) {
     return (
       <section className="mx-auto max-w-3xl px-4 py-16">
         <div className="rounded-2xl border bg-muted/20 px-6 py-14 text-center">
@@ -130,7 +135,7 @@ const UserCampgroundsPage = () => {
     );
   }
 
-  if (campgrounds.length === 0 && currentUser._id !== userId) {
+  if (campgrounds.length === 0 && currentUser?._id !== userId) {
     return (
       <section className="mx-auto max-w-3xl px-4 py-16">
         <div className="rounded-2xl border bg-muted/20 px-6 py-14 text-center">
@@ -173,19 +178,19 @@ const UserCampgroundsPage = () => {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">
-            {currentUser._id === userId
+            {currentUser?._id === userId
               ? "My campgrounds"
               : `${campgrounds[0]?.author.username}${campgrounds[0]?.author.username.endsWith("s") ? "'" : "'s"} campgrounds`}
           </h1>
 
           <p className="mt-2 text-muted-foreground">
-            {currentUser._id === userId
+            {currentUser?._id === userId
               ? "Manage your listings, bookings and availability."
               : "Browse campgrounds added by this user."}
           </p>
         </div>
 
-        {currentUser._id === userId && (
+        {currentUser?._id === userId && (
           <Button nativeButton={false} render={<Link to="/campgrounds/new" />}>
             <Plus className="size-4" />
             Add campground
@@ -200,7 +205,7 @@ const UserCampgroundsPage = () => {
           );
 
           const mainImage = campground.images[0];
-          const isOwner = currentUser._id === campground.author._id;
+          const isOwner = currentUser?._id === campground.author._id;
 
           const bookingsCount = stats?.bookingsCount ?? 0;
           const revenue = stats?.revenue ?? 0;

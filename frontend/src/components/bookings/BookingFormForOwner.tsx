@@ -1,12 +1,9 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { DateRange, Matcher } from "react-day-picker";
 import { CalendarDays, LockKeyhole } from "lucide-react";
 import { toast } from "sonner";
 
-import {
-  blockDatesByOwner,
-  getCampgroundAvailability,
-} from "@/api/booking.api";
+import { blockDatesByOwner } from "@/api/booking.api";
 
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -18,7 +15,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-import type { Booking, UnavailableBooking } from "@/types/booking";
+import type { Booking } from "@/types/booking";
+import axios from "axios";
 
 type BookingFormForOwnerProps = {
   campgroundId: string;
@@ -40,39 +38,14 @@ const BookingFormForOwner = ({
   bookings,
 }: BookingFormForOwnerProps) => {
   const [selectedRange, setSelectedRange] = useState<DateRange | undefined>();
-
-  // const [unavailableBookings, setUnavailableBookings] = useState<
-  //   UnavailableBooking[]
-  // >([]);
-
-  const [isLoadingAvailability, setIsLoadingAvailability] = useState(true);
   const [isBlocking, setIsBlocking] = useState(false);
   const [error, setError] = useState("");
-
-  const fetchAvailability = async () => {
-    try {
-      setIsLoadingAvailability(true);
-      setError("");
-      await getCampgroundAvailability(campgroundId);
-    } catch (error) {
-      console.error("Failed to fetch campground availability:", error);
-
-      setError("Could not load unavailable dates");
-    } finally {
-      setIsLoadingAvailability(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchAvailability();
-  }, [campgroundId]);
 
   const disabledBookingRanges: Matcher[] = bookings.map((booking) => {
     const checkIn = new Date(booking.checkIn);
     const checkOut = new Date(booking.checkOut);
 
     const lastOccupiedDay = new Date(checkOut);
-
     lastOccupiedDay.setDate(lastOccupiedDay.getDate() - 1);
 
     return {
@@ -110,13 +83,11 @@ const BookingFormForOwner = ({
       toast.success("Dates blocked successfully");
 
       setSelectedRange(undefined);
-
-      await fetchAvailability();
     } catch (error) {
       console.error("Failed to block campground dates:", error);
-
-      const message =
-        error.response?.data?.message ?? "Failed to block selected dates";
+      const message = axios.isAxiosError(error)
+        ? error.response?.data?.message
+        : "Something went wrong";
 
       setError(message);
       toast.error(message);
@@ -124,18 +95,6 @@ const BookingFormForOwner = ({
       setIsBlocking(false);
     }
   };
-
-  if (isLoadingAvailability) {
-    return (
-      <Card>
-        <CardContent className="py-10">
-          <p className="text-center text-sm text-muted-foreground">
-            Loading availability...
-          </p>
-        </CardContent>
-      </Card>
-    );
-  }
 
   return (
     <Card>

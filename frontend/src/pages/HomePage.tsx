@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import PageLoader from "@/components/PageLoader";
+import axios from "axios";
 
 const HomePage = () => {
   const [urlSearchParams, setUrlSearchParams] = useSearchParams();
@@ -97,22 +98,36 @@ const HomePage = () => {
       toast.warning("You are not the author");
     }
 
-    if (state?.action === "refresh") {
-      const emptyFilters = {
-        location: "",
-        checkIn: "",
-        checkOut: "",
-      };
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
-      setFilters(emptyFilters);
-      setSearchForm(emptyFilters);
+    if (state?.action === "refresh") {
+      timeoutId = setTimeout(() => {
+        const emptyFilters = {
+          location: "",
+          checkIn: "",
+          checkOut: "",
+        };
+
+        setFilters(emptyFilters);
+        setSearchForm(emptyFilters);
+
+        setUrlSearchParams({});
+      }, 0);
     }
 
-    navigate(state.pathname, {
-      replace: true,
-      state: null,
-    });
-  }, [state.action, state.pathname, navigate]);
+    if (state.pathname) {
+      navigate(state.pathname, {
+        replace: true,
+        state: null,
+      });
+    }
+
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, [state.action, state.pathname, navigate, setUrlSearchParams]);
 
   useEffect(() => {
     const fetchCampgrounds = async () => {
@@ -133,10 +148,11 @@ const HomePage = () => {
         console.error("Failed to fetch campgrounds:", error);
 
         setError("Failed to fetch campgrounds");
+        const message = axios.isAxiosError(error)
+          ? error.response?.data?.message
+          : "Something went wrong";
 
-        toast.warning(
-          error.response?.data?.message ?? "Failed to fetch campgrounds",
-        );
+        toast.warning(message);
       } finally {
         setIsLoading(false);
         setIsSearching(false);

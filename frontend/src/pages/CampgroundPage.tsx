@@ -1,4 +1,10 @@
-import { useEffect, useRef, useState, type SubmitEventHandler } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type SubmitEventHandler,
+} from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   CalendarDays,
@@ -26,7 +32,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 import { useAuthStore } from "@/store/auth.store";
 import CampgroundMap from "@/components/CampgroundMap";
-import type { userBooking } from "@/types/booking";
+import type { Booking, userBooking } from "@/types/booking";
 import { getUserBooking, getUserBookings } from "@/api/booking.api";
 import PageLoader from "@/components/PageLoader";
 import ErrorState from "@/components/ErrorState";
@@ -74,7 +80,7 @@ const CampgroundPage = () => {
   const [updateReviewError, setUpdateReviewError] = useState("");
   const [deleteReviewError, setDeleteReviewError] = useState("");
 
-  const [userBookings, setUserBookings] = useState([]);
+  const [userBookings, setUserBookings] = useState<Booking[]>([]);
 
   const location = useLocation();
 
@@ -92,16 +98,20 @@ const CampgroundPage = () => {
   }, [campground, currentUser]);
 
   useEffect(() => {
-    if (!campground || !currentUser) return;
+    if (!campground || !currentUser || !id) return;
+
     const canUserPostReview = async () => {
       try {
+        setUserBookingError("");
+
         const data = await getUserBooking(id);
         setUserBooking(data.data);
       } catch (error) {
-        console.error("Cannot check if user has any reviews:", error);
-        setUserBookingError("Cannot check if user has any reviews");
+        console.error("Cannot check if user can post a review:", error);
+        setUserBookingError("Could not check if you can post a review");
       }
     };
+
     canUserPostReview();
   }, [campground, currentUser, id]);
 
@@ -178,12 +188,44 @@ const CampgroundPage = () => {
     shouldScrollToReviews.current = false;
   }, [isReviewsLoading]);
 
+  const handleCloseLightbox = () => {
+    setLightboxImageIndex(null);
+  };
+
+  const handlePreviousImage = useCallback(() => {
+    setLightboxImageIndex((previousIndex) => {
+      if (previousIndex === null) return null;
+
+      if (previousIndex === 0) {
+        return (campground?.images.length ?? 1) - 1;
+      }
+
+      return previousIndex - 1;
+    });
+  }, [campground?.images.length]);
+
+  const handleNextImage = useCallback(() => {
+    setLightboxImageIndex((previousIndex) => {
+      if (previousIndex === null) return null;
+
+      const imagesLength = campground?.images.length ?? 0;
+
+      if (previousIndex === imagesLength - 1) {
+        return 0;
+      }
+
+      return previousIndex + 1;
+    });
+  }, [campground?.images.length]);
+
   useEffect(() => {
     if (lightboxImageIndex === null) return;
+
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         handleCloseLightbox();
       }
+
       if (event.key === "ArrowLeft") {
         handlePreviousImage();
       }
@@ -192,36 +234,16 @@ const CampgroundPage = () => {
         handleNextImage();
       }
     };
+
     window.addEventListener("keydown", handleKeyDown);
+
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [lightboxImageIndex, campground?.images.length]);
+  }, [lightboxImageIndex, handlePreviousImage, handleNextImage]);
 
   const handleOpenLightbox = (imageIndex: number) => {
     setLightboxImageIndex(imageIndex);
-  };
-
-  const handleCloseLightbox = () => {
-    setLightboxImageIndex(null);
-  };
-
-  const handlePreviousImage = () => {
-    setLightboxImageIndex((previousIndex) => {
-      if (previousIndex === null) return null;
-      if (previousIndex === 0) {
-        return campground.images.length - 1;
-      }
-      return previousIndex - 1;
-    });
-  };
-
-  const handleNextImage = () => {
-    setLightboxImageIndex((previousIndex) => {
-      if (previousIndex === null) return null;
-      if (previousIndex === campground.images.length - 1) return 0;
-      return previousIndex + 1;
-    });
   };
 
   const calculateAverageRating = (reviews: Campground["reviews"]) => {
@@ -476,7 +498,7 @@ const CampgroundPage = () => {
       return;
     }
 
-    if (currentUser._id === campground.author._id) {
+    if (currentUser?._id === campground.author._id) {
       return;
     }
 
@@ -508,7 +530,7 @@ const CampgroundPage = () => {
     .toUpperCase();
 
   const userClosestBooking = userBookings?.find(
-    (booking) =>
+    (booking: Booking) =>
       booking.campground._id === campground._id &&
       booking.status === "confirmed" &&
       booking.type === "booking",
@@ -694,7 +716,13 @@ const CampgroundPage = () => {
 
               <CardContent className="space-y-6">
                 {currentUser ? (
-                  userBooking?.isPastBooking ? (
+                  userBookingError ? (
+                    <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-4">
+                      <p className="text-sm text-destructive">
+                        {userBookingError}
+                      </p>
+                    </div>
+                  ) : userBooking?.isPastBooking ? (
                     <form
                       onSubmit={handleCreateReview}
                       className="space-y-4 rounded-xl border bg-muted/20 p-4"

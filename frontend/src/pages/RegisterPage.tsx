@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { UserPlus } from "lucide-react";
+import axios from "axios";
 
 const RegisterPage = () => {
   const navigate = useNavigate();
@@ -35,7 +36,10 @@ const RegisterPage = () => {
       navigate("/login", { replace: true });
     } catch (error) {
       console.error("Failed to register user", error);
-      toast.error(error.response?.data?.message ?? "Failed to create account");
+      const message = axios.isAxiosError(error)
+        ? error.response?.data?.message
+        : "Something went wrong";
+      toast.error(message);
     }
   };
 

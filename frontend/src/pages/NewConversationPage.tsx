@@ -32,6 +32,7 @@ const NewConversationPage = () => {
 
   useEffect(() => {
     const isConversation = async () => {
+      if (!campgroundId || !guestId) return;
       try {
         const data = await checkIsThereConversation(campgroundId, guestId);
         setConversation(data.data);
@@ -54,6 +55,8 @@ const NewConversationPage = () => {
     event,
   ) => {
     event.preventDefault();
+
+    if (!campgroundId || !guestId) return;
 
     const trimmedText = messageText.trim();
 

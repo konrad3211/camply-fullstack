@@ -11,7 +11,7 @@ type CampgroundPreviewUser = {
 export type CampgroundPreview = {
   _id: string;
   title: string;
-  images: CampgroundImage;
+  images: CampgroundImage[];
   author: CampgroundPreviewUser;
 };
 
