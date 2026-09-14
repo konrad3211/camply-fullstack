@@ -1,5 +1,20 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import request from "supertest";
+
+vi.mock("../src/lib/cloudinary.js", async () => {
+  const actual = await vi.importActual("../src/lib/cloudinary.js");
+
+  return {
+    ...actual,
+    default: {
+      ...actual.default,
+      uploader: {
+        ...actual.default.uploader,
+        destroy: vi.fn().mockResolvedValue({ result: "ok" }),
+      },
+    },
+  };
+});
 
 import app from "../src/app.js";
 import { Campground } from "../src/models/campground.model.js";
