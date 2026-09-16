@@ -52,7 +52,7 @@ const UserCampgroundsPage = () => {
   const page = Math.max(Number(urlSearchParams.get("page")) || 1, 1);
 
   useEffect(() => {
-    if (!currentUser || !userId) return;
+    if (!userId) return;
 
     const fetchCampgrounds = async () => {
       try {
@@ -78,7 +78,7 @@ const UserCampgroundsPage = () => {
     };
 
     fetchCampgrounds();
-  }, [currentUser, userId, page]);
+  }, [userId, page]);
 
   useEffect(() => {
     if (!currentUser || currentUser._id !== userId) return;
