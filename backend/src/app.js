@@ -36,6 +36,13 @@ app.use("/api/campgrounds/:id/reviews", reviewRoutes);
 app.use("/api/conversations", conversationRoutes);
 app.use("/api/bookings", bookingRouter);
 
+app.get("/api/health", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Server is healthy",
+  });
+});
+
 if (process.env.NODE_ENV === "production") {
   app.use(express.static(frontendDistPath));
 
