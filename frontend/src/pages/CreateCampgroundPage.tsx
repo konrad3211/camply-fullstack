@@ -62,7 +62,7 @@ const CreateCampgroundPage = () => {
   };
 
   return (
-    <section className="mx-auto max-w-4xl space-y-8 py-6">
+    <section className="mx-auto max-w-4xl space-y-8 px-4 py-6 sm:px-6 lg:px-0">
       <div className="space-y-2">
         <div className="flex items-center gap-2 text-primary">
           <TentTree className="size-5" />
@@ -70,7 +70,7 @@ const CreateCampgroundPage = () => {
           <span className="text-sm font-medium">Host your campground</span>
         </div>
 
-        <h1 className="text-3xl font-bold tracking-tight">
+        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
           Create a campground
         </h1>
 

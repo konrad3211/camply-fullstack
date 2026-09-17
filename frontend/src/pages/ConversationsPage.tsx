@@ -119,9 +119,11 @@ const ConversationsPage = () => {
   }
 
   return (
-    <section className="mx-auto max-w-3xl space-y-6 py-8">
+    <section className="mx-auto max-w-3xl space-y-6 px-4 py-8 sm:px-6 lg:px-0">
       <div className="space-y-1">
-        <h1 className="text-3xl font-bold tracking-tight">Conversations</h1>
+        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+          Conversations
+        </h1>
 
         <p className="text-muted-foreground">
           Messages about your campground bookings and stays.
@@ -159,8 +161,8 @@ const ConversationsPage = () => {
                 className="block"
               >
                 <Card className="transition-colors hover:bg-muted/40">
-                  <CardContent className="flex items-center gap-4 p-4">
-                    <div className="size-16 shrink-0 overflow-hidden rounded-xl bg-muted">
+                  <CardContent className="flex items-center gap-3 p-3 sm:gap-4 sm:p-4">
+                    <div className="size-14 shrink-0 overflow-hidden rounded-xl bg-muted sm:size-16">
                       {imageUrl ? (
                         <img
                           src={imageUrl}
@@ -175,7 +177,7 @@ const ConversationsPage = () => {
                     </div>
 
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-start justify-between gap-4">
+                      <div className="flex items-start justify-between gap-3 sm:gap-4">
                         <div className="min-w-0">
                           <h2
                             className={`truncate ${
