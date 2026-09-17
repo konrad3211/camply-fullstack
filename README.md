@@ -2,6 +2,8 @@
 
 [![CI](https://github.com/konrad3211/camply-fullstack/actions/workflows/ci.yml/badge.svg)](https://github.com/konrad3211/camply-fullstack/actions/workflows/ci.yml)
 
+![Camply preview](./screenshots/camply-preview.png)
+
 Camply is a full-stack campground booking platform where users can discover campgrounds, make reservations, manage listings, leave reviews and communicate in real time.
 
 The application is built with React, TypeScript, Express, MongoDB and Socket.IO. It is containerized with Docker and deployed as a single full-stack service on Northflank.
@@ -193,6 +195,9 @@ camply-fullstack/
 |   |   +-- types/
 |   +-- public/
 |   +-- package.json
+|
++-- screenshots/
+|   +-- camply-preview.png
 |
 +-- .github/
 |   +-- workflows/
