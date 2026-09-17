@@ -128,22 +128,3 @@
     @apply font-sans;
     }
 }
-
-@media (max-width: 767px) {
-  section > div[class~="relative"][class~="w-screen"] > div[class~="mx-auto"][class~="max-w-7xl"]:first-child {
-    padding: 2.5rem 1rem 2rem;
-  }
-
-  section > div[class~="relative"][class~="w-screen"] > div[class~="absolute"][class~="bottom-0"] {
-    position: static;
-    left: auto;
-    transform: none;
-    padding: 0 1rem 1.5rem;
-  }
-
-  section > div[class~="relative"][class~="w-screen"] + div[class~="mx-auto"][class~="max-w-7xl"] {
-    padding-top: 2rem;
-    padding-left: 1rem;
-    padding-right: 1rem;
-  }
-}

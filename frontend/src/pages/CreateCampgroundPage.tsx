@@ -2,7 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ImagePlus, MapPin, TentTree } from "lucide-react";
+import { ImagePlus, MapPin } from "lucide-react";
+import axios from "axios";
 
 import { createCampground } from "@/api/campground.api";
 
@@ -19,7 +20,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import axios from "axios";
 
 const inputClassName =
   "w-full rounded-lg border bg-background px-3 py-2.5 text-sm outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/20 disabled:cursor-not-allowed disabled:opacity-50";
@@ -56,20 +56,15 @@ const CreateCampgroundPage = () => {
       const message = axios.isAxiosError(error)
         ? error.response?.data?.message
         : "Something went wrong";
+
       console.error(message);
       setServerError(message);
     }
   };
 
   return (
-    <section className="mx-auto max-w-4xl space-y-8 px-4 py-6 sm:px-6 lg:px-0">
+    <section className="mx-auto max-w-4xl space-y-8 px-4 py-8 sm:px-6 lg:px-0">
       <div className="space-y-2">
-        <div className="flex items-center gap-2 text-primary">
-          <TentTree className="size-5" />
-
-          <span className="text-sm font-medium">Host your campground</span>
-        </div>
-
         <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
           Create a campground
         </h1>
@@ -253,7 +248,7 @@ const CreateCampgroundPage = () => {
           <CardContent>
             <label
               htmlFor="images"
-              className="flex cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed p-10 text-center transition-colors hover:bg-muted/40"
+              className="flex cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed p-6 text-center transition-colors hover:bg-muted/40 sm:p-10"
             >
               <div className="mb-4 flex size-12 items-center justify-center rounded-full bg-muted">
                 <ImagePlus className="size-6" />

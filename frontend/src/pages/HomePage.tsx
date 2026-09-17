@@ -7,6 +7,7 @@ import {
 } from "react-router-dom";
 import { CalendarDays, MapPin, Search, Star } from "lucide-react";
 import { toast } from "sonner";
+import axios from "axios";
 
 import { getCampgrounds } from "@/api/campground.api";
 import type { Campground } from "@/types/campground";
@@ -21,7 +22,6 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import PageLoader from "@/components/PageLoader";
-import axios from "axios";
 
 const HomePage = () => {
   const [urlSearchParams, setUrlSearchParams] = useSearchParams();
@@ -148,6 +148,7 @@ const HomePage = () => {
         console.error("Failed to fetch campgrounds:", error);
 
         setError("Failed to fetch campgrounds");
+
         const message = axios.isAxiosError(error)
           ? error.response?.data?.message
           : "Something went wrong";
@@ -228,31 +229,31 @@ const HomePage = () => {
 
   return (
     <section>
-      <div className="relative left-1/2 w-screen -translate-x-1/2 border-b bg-muted/30">
-        <div className="mx-auto max-w-7xl px-6 pb-24 pt-14">
+      <div className="relative border-b bg-muted/30">
+        <div className="mx-auto max-w-7xl px-4 pb-8 pt-10 sm:px-6 md:pb-24 md:pt-14">
           {currentUser?.fullName ? (
-            <h1 className="text-4xl font-bold tracking-tight md:text-5xl">
+            <h1 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
               Where to next, {currentUser.fullName.split(" ")[0]}?
             </h1>
           ) : (
-            <h1 className="text-4xl font-bold tracking-tight md:text-5xl">
+            <h1 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
               Find your next campground
             </h1>
           )}
 
-          <p className="mt-3 max-w-2xl text-lg text-muted-foreground">
+          <p className="mt-3 max-w-2xl text-base text-muted-foreground sm:text-lg">
             Discover unique places added by the Camply community and find your
             next stay.
           </p>
         </div>
 
-        <div className="absolute bottom-0 left-1/2 w-full max-w-7xl translate-y-1/2 -translate-x-1/2 px-6">
+        <div className="mx-auto w-full max-w-7xl px-4 pb-6 sm:px-6 md:absolute md:bottom-0 md:left-1/2 md:-translate-x-1/2 md:translate-y-1/2 md:pb-0">
           <form
             onSubmit={handleSearch}
-            className="rounded-2xl border bg-background p-2 shadow-lg"
+            className="w-full rounded-2xl border bg-background p-2 shadow-lg"
           >
             <div className="grid gap-1 md:grid-cols-[1.4fr_1fr_1fr_auto]">
-              <div className="flex min-h-18 items-center gap-3 rounded-xl px-4 transition hover:bg-muted/40">
+              <div className="flex min-h-18 min-w-0 items-center gap-3 rounded-xl px-4 transition hover:bg-muted/40">
                 <MapPin className="size-6 shrink-0 text-muted-foreground" />
 
                 <div className="min-w-0 flex-1">
@@ -268,7 +269,7 @@ const HomePage = () => {
                     name="location"
                     value={searchForm.location}
                     placeholder="Where do you want to go?"
-                    className="mt-1 w-full bg-transparent text-sm font-medium outline-none placeholder:font-normal placeholder:text-muted-foreground"
+                    className="mt-1 w-full min-w-0 bg-transparent text-sm font-medium outline-none placeholder:font-normal placeholder:text-muted-foreground"
                     onChange={(event) =>
                       setSearchForm((prev) => ({
                         ...prev,
@@ -281,7 +282,7 @@ const HomePage = () => {
 
               <div
                 onClick={() => checkInRef.current?.showPicker()}
-                className="flex min-h-18 cursor-pointer items-center gap-3 rounded-xl border-t px-4 transition hover:bg-muted/40 md:border-l md:border-t-0"
+                className="flex min-h-18 min-w-0 cursor-pointer items-center gap-3 rounded-xl border-t px-4 transition hover:bg-muted/40 md:border-l md:border-t-0"
               >
                 <CalendarDays className="size-6 shrink-0 text-muted-foreground" />
 
@@ -300,7 +301,7 @@ const HomePage = () => {
                     type="date"
                     value={searchForm.checkIn}
                     min={todayFormatted}
-                    className="mt-1 w-full cursor-pointer bg-transparent text-sm font-medium outline-none [&::-webkit-calendar-picker-indicator]:hidden"
+                    className="mt-1 w-full min-w-0 cursor-pointer bg-transparent text-sm font-medium outline-none [&::-webkit-calendar-picker-indicator]:hidden"
                     onChange={(event) =>
                       handleCheckInChange(event.target.value)
                     }
@@ -314,7 +315,7 @@ const HomePage = () => {
 
                   checkOutRef.current?.showPicker();
                 }}
-                className={`flex min-h-18 items-center gap-3 rounded-xl border-t px-4 transition md:border-l md:border-t-0 ${
+                className={`flex min-h-18 min-w-0 items-center gap-3 rounded-xl border-t px-4 transition md:border-l md:border-t-0 ${
                   searchForm.checkIn
                     ? "cursor-pointer hover:bg-muted/40"
                     : "cursor-not-allowed opacity-50"
@@ -342,7 +343,7 @@ const HomePage = () => {
                     value={searchForm.checkOut}
                     min={minimumCheckOutDate}
                     disabled={!searchForm.checkIn}
-                    className="mt-1 w-full cursor-pointer bg-transparent text-sm font-medium outline-none disabled:cursor-not-allowed [&::-webkit-calendar-picker-indicator]:hidden"
+                    className="mt-1 w-full min-w-0 cursor-pointer bg-transparent text-sm font-medium outline-none disabled:cursor-not-allowed [&::-webkit-calendar-picker-indicator]:hidden"
                     onChange={(event) =>
                       setSearchForm((prev) => ({
                         ...prev,
@@ -358,7 +359,7 @@ const HomePage = () => {
                 disabled={
                   isSearching || isSearchUnchanged || hasIncompleteDateRange
                 }
-                className="min-h-14 rounded-xl px-7 md:min-h-18"
+                className="min-h-14 w-full rounded-xl px-7 md:min-h-18 md:w-auto"
               >
                 <Search className="size-5" />
 
@@ -369,9 +370,9 @@ const HomePage = () => {
         </div>
       </div>
 
-      <div className="mx-auto max-w-7xl px-6 pb-12 pt-20">
+      <div className="mx-auto max-w-7xl px-4 pb-12 pt-8 sm:px-6 md:pt-20">
         <div className="mb-8">
-          <h2 className="text-3xl font-bold tracking-tight">
+          <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
             Find your next campground
           </h2>
 
@@ -461,12 +462,12 @@ const HomePage = () => {
                     </p>
                   </CardContent>
 
-                  <CardFooter className="flex items-center justify-between">
+                  <CardFooter className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <span className="font-semibold">
                       {campground.price} zł / night
                     </span>
 
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 self-end sm:self-auto">
                       <Button
                         render={<Link to={`/campgrounds/${campground._id}`} />}
                         nativeButton={false}
@@ -496,7 +497,7 @@ const HomePage = () => {
         )}
 
         {totalPages > 1 && (
-          <div className="mt-8 flex items-center justify-center gap-2">
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-2">
             <Button
               variant="outline"
               disabled={page === 1}
