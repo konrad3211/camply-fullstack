@@ -66,7 +66,7 @@ const BookingSuccessPage = () => {
   }
 
   return (
-    <section className="mx-auto max-w-xl space-y-4 py-10">
+    <section className="mx-auto max-w-xl space-y-4 px-4 py-8 sm:px-6 sm:py-10">
       {locationState?.action === "showConfirmation" && locationState?.from && (
         <Button
           variant="ghost"
