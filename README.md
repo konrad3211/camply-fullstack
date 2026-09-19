@@ -6,11 +6,11 @@
 
 Camply is a full-stack campground booking platform where users can discover campgrounds, make reservations, manage listings, leave reviews and communicate in real time.
 
-The application is built with React, TypeScript, Express, MongoDB and Socket.IO. It is containerized with Docker and deployed as a single full-stack service on Northflank.
+The application is built with React, TypeScript, Express, MongoDB and Socket.IO. It is containerized with Docker and deployed as a single full-stack service on a Hetzner Cloud VPS, behind Caddy with HTTPS.
 
 ## Live Demo
 
-**Live application:** https://p01--camply-fullstack--djj5npnylmvq.code.run/
+**Live application:** https://camply.konradpatla.pl
 
 ### Demo accounts
 
@@ -132,8 +132,10 @@ Backend integration tests cover the main application flows, including authentica
 - Docker
 - Multi-stage Docker build
 - GitHub Actions CI
-- Northflank deployment
-- HTTP readiness health check
+- Hetzner Cloud VPS
+- Docker Compose
+- Caddy reverse proxy with automatic HTTPS
+- HTTP health endpoint
 
 ---
 
@@ -141,22 +143,12 @@ Backend integration tests cover the main application flows, including authentica
 
 Camply is deployed as a single full-stack service.
 
-```text
-Browser
-   |
-   v
-Northflank
-   |
-   v
-Docker container
-   |
-   +-- Express API
-   |     +-- MongoDB Atlas
-   |     +-- Cloudinary
-   |     +-- Socket.IO
-   |
-   +-- React production build
-         +-- frontend/dist
+```mermaid
+flowchart TD
+    browser["Browser"] -->|HTTPS| caddy["Caddy on Hetzner VPS"]
+    caddy --> app["Camply Docker container: Express, Socket.IO and React build"]
+    app --> mongo["MongoDB Atlas"]
+    app --> cloudinary["Cloudinary"]
 ```
 
 In production, Express serves both the REST API and the compiled React frontend.
@@ -389,34 +381,30 @@ Example response:
 }
 ```
 
-Northflank uses this endpoint as a readiness probe before routing traffic to a newly deployed application instance.
+This endpoint can be used to check that the API responds after deployment. It is available at https://camply.konradpatla.pl/api/health.
 
 ---
 
 ## Deployment
 
-The application is deployed on Northflank from the GitHub repository using Docker.
+The application runs on a Hetzner Cloud VPS using Docker Compose. Caddy handles HTTPS and forwards requests for `camply.konradpatla.pl` to the `camply` container on internal port `3000` over the shared Docker network `proxy`.
 
-```text
-git push
-   |
-   v
-GitHub
-   |
-   v
-Northflank detects the new commit
-   |
-   v
-Docker image is built
-   |
-   v
-New application instance starts
-   |
-   v
-/api/health readiness check passes
-   |
-   v
-Traffic is routed to the new deployment
+The repository is cloned to `/opt/apps/camply` on the VPS. The server-side Compose configuration loads runtime variables from `backend/.env` and sets `NODE_ENV=production`, `PORT=3000`, and `CLIENT_URL=https://camply.konradpatla.pl`.
+
+Deployment is currently manual. GitHub Actions checks pushes and pull requests, but does not deploy changes to the VPS. After the checks pass, update the application on the server:
+
+```bash
+cd /opt/apps/camply
+git pull --ff-only origin main
+docker compose up -d --build
+docker compose ps
+docker compose logs --tail=60 camply
+```
+
+Verify the deployed API:
+
+```bash
+curl --fail https://camply.konradpatla.pl/api/health
 ```
 
 ---
