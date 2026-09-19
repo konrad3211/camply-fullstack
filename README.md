@@ -146,12 +146,12 @@ Camply is deployed as a single full-stack service.
 ```mermaid
 flowchart TD
     browser["Browser"] -->|HTTPS| caddy["Caddy on Hetzner VPS"]
-    caddy --> app["Camply Docker container: Express, Socket.IO and React build"]
+    caddy --> app["Camply Docker container"]
     app --> mongo["MongoDB Atlas"]
     app --> cloudinary["Cloudinary"]
 ```
 
-In production, Express serves both the REST API and the compiled React frontend.
+The Camply container runs Express and Socket.IO and includes the compiled React frontend. In production, Express serves both the REST API and the frontend files.
 
 API requests use the `/api` prefix, while frontend routes are handled by React Router through the SPA fallback.
 
