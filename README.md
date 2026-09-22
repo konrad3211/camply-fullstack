@@ -1,6 +1,6 @@
 # Camply
 
-[![CI](https://github.com/konrad3211/camply-fullstack/actions/workflows/ci.yml/badge.svg)](https://github.com/konrad3211/camply-fullstack/actions/workflows/ci.yml)
+[![CI/CD](https://github.com/konrad3211/camply-fullstack/actions/workflows/ci.yml/badge.svg)](https://github.com/konrad3211/camply-fullstack/actions/workflows/ci.yml)
 
 ![Camply preview](./screenshots/camply-preview.png)
 
@@ -131,7 +131,8 @@ Backend integration tests cover the main application flows, including authentica
 
 - Docker
 - Multi-stage Docker build
-- GitHub Actions CI
+- GitHub Actions CI/CD
+- Automatic deployment to the VPS after successful CI on `main`
 - Hetzner Cloud VPS
 - Docker Compose
 - Caddy reverse proxy with automatic HTTPS
@@ -347,20 +348,19 @@ http://localhost:3000
 
 ---
 
-## Continuous Integration
+## Continuous Integration and Deployment
 
-GitHub Actions runs automatically on pushes and pull requests.
+The [GitHub Actions workflow](.github/workflows/ci.yml) runs CI on pushes and pull requests. Backend and frontend checks run in parallel.
 
-```text
-Backend
-+-- npm ci
-+-- npm test
+| Job | Checks |
+| --- | --- |
+| Backend | Install dependencies with `npm ci` and run integration tests with `npm test` |
+| Frontend | Install dependencies with `npm ci`, run linting and create a production build |
+| Deploy | After both jobs succeed on a push to `main`, deploy the tested commit to the VPS and check the public API |
 
-Frontend
-+-- npm ci
-+-- npm run lint
-+-- npm run build
-```
+Pushes to `main`, including merges of pull requests, trigger continuous deployment. Pull request runs and pushes to other branches run CI without deploying.
+
+The deployment job connects over SSH as `camply-deploy`, verifies the server host key and invokes the server-side deployment script with the tested commit SHA. Production deployments run one at a time.
 
 ---
 
@@ -389,17 +389,18 @@ This endpoint can be used to check that the API responds after deployment. It is
 
 The application runs on a Hetzner Cloud VPS using Docker Compose. Caddy handles HTTPS and forwards requests for `camply.konradpatla.pl` to the `camply` container on internal port `3000` over the shared Docker network `proxy`.
 
-The repository is cloned to `/opt/apps/camply` on the VPS. The server-side Compose configuration loads runtime variables from `backend/.env` and sets `NODE_ENV=production`, `PORT=3000`, and `CLIENT_URL=https://camply.konradpatla.pl`.
+The repository is cloned to `/opt/apps/camply` on the VPS. Deployment uses the server-side Compose configuration at `/etc/camply/docker-compose.yml`, with `/opt/apps/camply` as its project directory. Runtime variables are loaded from `backend/.env`; the configuration sets `NODE_ENV=production`, `PORT=3000`, and `CLIENT_URL=https://camply.konradpatla.pl`.
 
-Deployment is currently manual. GitHub Actions checks pushes and pull requests, but does not deploy changes to the VPS. After the checks pass, update the application on the server:
+Deployment is automated through GitHub Actions. The root-owned script `/usr/local/sbin/deploy-camply`:
 
-```bash
-cd /opt/apps/camply
-git pull --ff-only origin main
-docker compose up -d --build
-docker compose ps
-docker compose logs --tail=60 camply
-```
+1. Fetches `main` and verifies that the requested commit is still its latest commit.
+2. Updates the repository using `git merge --ff-only`, stopping if tracked files have local changes or the history has diverged.
+3. Builds the Docker image before replacing the Camply container.
+4. Checks `/api/health` inside the container; the workflow then checks the public HTTPS endpoint.
+
+The `camply-deploy` account has permission to run this script through `sudo` without a password. SSH connection settings are stored in GitHub Actions secrets: `VPS_HOST`, `VPS_USER`, `VPS_SSH_KEY`, and `VPS_KNOWN_HOSTS`. Application secrets remain on the VPS.
+
+A failed health check marks the deployment as failed; automatic rollback is not configured.
 
 Verify the deployed API:
 
