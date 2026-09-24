@@ -103,6 +103,14 @@ const BookingForm = ({ campgroundId, pricePerNight }: BookingFormProps) => {
       return;
     }
 
+    if (!currentUser) {
+      return navigate("/login", {
+        state: {
+          from: `/campgrounds/${campgroundId}`,
+        },
+      });
+    }
+
     try {
       setIsCreating(true);
       setError("");
